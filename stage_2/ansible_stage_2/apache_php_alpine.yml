@@ -1,0 +1,28 @@
+---
+- hosts: mts_backend
+  become: yes
+  remote_user: root
+  gather_facts: false
+
+
+  vars:
+    script_source: "/home/hex/mts_test/stage_2/backend_{{ back_type }}"
+
+  tasks:
+
+    - name: Install apache2 and php
+      apk:
+        update_cache: true
+        state: present
+        name: php81, apache2, php81-apache2
+
+    - name: Copy calc.php script
+      copy:
+        src: "{{ script_source }}/calc.php"
+        dest: /var/www/localhost/htdocs/calc.php
+
+    - name: Run apache2
+      shell:
+        cmd: pgrep httpd || httpd -DBACKGROUND
+      changed_when: false
+

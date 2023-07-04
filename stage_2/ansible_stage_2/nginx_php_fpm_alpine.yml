@@ -1,0 +1,79 @@
+---
+- hosts: frontend
+  become: yes
+  remote_user: root
+  gather_facts: false
+
+
+  vars:
+    project_source: /home/hex/mts_test/stage_2/frontend/
+
+
+  tasks:
+
+    - name: Install nginx and php-fpm
+      apk:
+        update_cache: true
+        state: present
+        name: php81, php81-curl, php81-fpm, nginx
+
+    - name: Create directory for php-fpm socket file
+      file:
+        path: /run/php
+        group: nginx
+        state: directory
+        recurse: yes
+
+    - name: Create /var/www/html directory
+      file:
+        path: /var/www/html
+        owner: nginx
+        group: nginx
+        state: directory
+        recurse: yes
+
+    - name: Remove php-fpm default listener settings
+      lineinfile:
+        path: /etc/php81/php-fpm.d/www.conf
+        regexp: '^\s*listen\s*(=|\.owner|\.group|\.mode).+\s*$'
+        state: absent
+
+    - name: Set php-fpm listener settings for nginx
+      blockinfile:
+        path: /etc/php81/php-fpm.d/www.conf
+        block: |
+          listen = /run/php/php8.1-fpm.sock
+          listen.owner = nginx
+          listen.group = nginx
+          listen.mode = 0660
+        marker: "; <!-- {mark} ANSIBLE MANAGED BLOCK -->"
+
+    - name: Delete default site config
+      file:
+        path: /etc/nginx/http.d/default.conf
+        state: absent
+
+    - name: Copy nginx configuration file for calculator
+      copy:
+        src: "{{ project_source }}/calculation.conf"
+        dest: /etc/nginx/http.d/calculation.conf
+        owner: nginx
+        group: nginx
+
+    - name: Copy calculator website
+      copy:
+        src: "{{ project_source }}/website/"
+        dest: /var/www/html/
+        owner: nginx
+        group: nginx
+
+    - name: Run php-fpm
+      shell:
+        cmd: pgrep php-fpm81 || php-fpm81 -D
+      changed_when: false
+
+    - name: Run nginx
+      shell:
+        cmd: pgrep nginx || nginx -g "daemon on;"
+      changed_when: false
+

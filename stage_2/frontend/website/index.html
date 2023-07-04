@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MTS Calculator</title>
+	<meta http-equiv='Content-Type' content='text/html' charset='utf-8'/>
+	<script type=text/javascript src="static/js/jquery360.js"></script>
+	<style>
+		body { padding:20px; }
+		.main_form p span, .main_form p b { 
+			display: inline-block;
+			width: 200px;
+			text-align: right;
+		}
+		.main_form p input[type="text"], .main_form p select { 
+			width: 200px;
+		}
+	</style>
+</head>
+<body>
+	<div style="float: left;width: 50%;">
+	<script type=text/javascript src="static/js/functions.js"></script>
+	<form action="/" class="main_form" method="post" name="submit_form" id="submit_form">
+		<h3>Введите два числа:</h3>
+		<p><span>Число 1 </span> &nbsp;<input type="text" id="num_1" name="num_1" placeholder="Например, 128, -128 или 3.14"></p>
+		<p><span>Число 2 </span> &nbsp;<input type="text" id="num_2" name="num_2" placeholder="Например, 128, -128 или 3.14"></p>
+
+		<p>
+		   <input style="width: 150px; height: 35px; left: 50%" name="action" id="calculation" type="button" value="Рассчитать" onclick="button_calculation();">
+		</p>
+		
+		<pre style="font-size: 20px;" id="info_msg"></pre>
+	</form>
+	</div>
+	<p style="float: left;width: 50%; font-size: 20px;" id="res_summ"></p>
+	<p style="float: left;width: 50%; font-size: 20px;" id="res_mult"></p>
+	</body>
