@@ -1,0 +1,24 @@
+---
+version: "2.4"
+services:
+  frontend_s2:
+    image: alpine_ssh:stage2
+    ports:
+      - "80:80"
+      - "30022:22"
+    hostname: front-stage2
+    depends_on:
+      - backend_summ_s2
+      - backend_mult_s2
+
+  backend_summ_s2:
+    image: alpine_ssh:stage2
+    ports:
+      - "30122:22"
+    hostname: back-summ-stage2
+
+  backend_mult_s2:
+    image: alpine_ssh:stage2
+    ports:
+      - "30222:22"
+    hostname: back-mult-stage2

@@ -1,0 +1,64 @@
+stages:
+  - linters
+  - build
+  - run_containers
+  - containers_test
+  - deploy
+  - app_test
+  - clean
+
+ansible_linter:
+  stage: linters
+  tags:
+    - docker-compose
+  script:
+    - ansible-lint ./ansible_stage_2/*.yml -x 208
+
+build_images_job:
+  stage: build
+  tags:
+    - docker-compose
+  script:
+    - cd ./alpine_ssh/
+    - echo $SSH_KEY_ALPINE_CONTAINERS > authorized_keys
+    - sudo docker build --rm -t alpine_ssh:stage2 .
+    
+run_images_job:
+  stage: run_containers
+  tags:
+    - docker-compose
+  script:
+    - sudo docker-compose -f ./alpine_ssh/docker-compose.yml up -d --build
+
+ssh_port_tests_job:
+  stage: containers_test
+  tags:
+    - docker-compose
+  script:
+    - netcat 127.0.0.1 30022 -z
+    - netcat 127.0.0.1 30122 -z
+    - netcat 127.0.0.1 30222 -z
+    
+deploy_app_by_ansible_job:
+  stage: deploy
+  tags:
+    - docker-compose
+  script:
+    - sudo ansible-playbook -i ./ansible_stage_2/stage_2_hosts ./ansible_stage_2/raw_python_install.yml
+    - sudo ansible-playbook -i ./ansible_stage_2/stage_2_hosts ./ansible_stage_2/nginx_php_fpm_alpine.yml
+    - sudo ansible-playbook -i ./ansible_stage_2/stage_2_hosts ./ansible_stage_2/apache_php_alpine.yml
+
+app_test_job:
+  stage: app_test
+  tags:
+    - docker-compose
+  script:
+    - curl localhost:80 | grep "calculation"
+
+clean_images_job:
+  stage: clean
+  tags:
+    - docker-compose
+  script:
+    - sudo docker image prune -f
+  when: always

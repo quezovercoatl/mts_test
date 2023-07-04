@@ -1,0 +1,34 @@
+---
+version: "2.4"
+services:
+  frontend:
+    build:
+      context: ./frontend/
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    hostname: front-stage1
+    depends_on:
+      - backend_summ
+      - backend_mult
+    cpus: 0.2    
+    mem_limit: 128m
+    memswap_limit: 128m
+
+  backend_summ:
+    build:
+      context: ./backend_summ/
+      dockerfile: Dockerfile
+    hostname: back-summ-stage1
+    cpus: 0.2
+    mem_limit: 128m
+    memswap_limit: 128m
+
+  backend_mult:
+    build:
+      context: ./backend_mult/
+      dockerfile: Dockerfile
+    hostname: back-mult-stage1
+    cpus: 0.2
+    mem_limit: 128m
+    memswap_limit: 128m

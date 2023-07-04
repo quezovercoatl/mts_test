@@ -1,0 +1,26 @@
+stages:
+  - build
+  - test
+  - clean
+
+build_images_job:
+  stage: build
+  tags:
+    - docker-compose
+  script:
+    - sudo docker-compose up -d --build
+
+curl_test_job:
+  stage: test
+  tags:
+    - docker-compose
+  script:
+    - curl localhost:80 | grep "calculation"
+
+clean_job:
+  stage: clean
+  tags:
+    - docker-compose
+  script:
+    - sudo docker image prune -f
+  when: always
