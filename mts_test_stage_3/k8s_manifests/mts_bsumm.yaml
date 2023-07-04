@@ -1,0 +1,63 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bsumm-deploy
+  labels:
+    app: calculator
+spec:
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      type: bsumm
+  template:
+    metadata:
+      labels:
+        type: bsumm
+    spec:
+      containers:
+        - name: back-summ
+          image: quezovercoatl/mts_bsumm:v1
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+      affinity:            
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: type
+                  operator: In
+                  values:
+                  - bsumm
+              topologyKey: topology.kubernetes.io/zone
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-summ
+  labels:
+    app: calculator
+spec:
+  selector:
+    type: bsumm
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+

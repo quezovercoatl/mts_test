@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-deploy
+  labels:
+    app: calculator
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      type: front
+  template:
+    metadata:
+      labels:
+        type: front
+    spec:
+      containers:
+        - name: front
+          image: quezovercoatl/mts_front:v3
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app: calculator
+spec:
+  selector:
+    type: front
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 32080
+  type: NodePort
+
